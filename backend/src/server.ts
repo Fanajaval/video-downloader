@@ -26,26 +26,48 @@ app.post("/api/download", async (req, res) => {
   try {
     const { url, filename } = req.body;
 
-    if (!url || !filename) {
+    if (!url) {
       return res.status(400).json({
         success: false,
-        message: "url et filename sont obligatoires"
+        message: "L'URL est obligatoire"
       });
     }
 
-    const filePath = await downloadFile(url, filename);
+    if (!filename) {
+      return res.status(400).json({
+        success: false,
+        message: "Le nom du fichier est obligatoire"
+      });
+    }
 
-    res.json({
+    if (
+      typeof url !== "string" ||
+      typeof filename !== "string"
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Données invalides"
+      });
+    }
+
+    const filePath = await downloadFile(
+      url,
+      filename
+    );
+
+    return res.json({
       success: true,
       message: "Téléchargement terminé",
       file: filePath
     });
-  } catch (error) {
-    console.error(error);
 
-    res.status(500).json({
+  } catch (error) {
+
+    console.error("Erreur téléchargement :", error);
+
+    return res.status(500).json({
       success: false,
-      message: "Erreur pendant le téléchargement"
+      message: "Impossible de télécharger le fichier"
     });
   }
 });
