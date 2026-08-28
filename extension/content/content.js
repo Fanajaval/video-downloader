@@ -1,7 +1,7 @@
-console.log("Video Downloader : page vidéo détectée");
-
 function getVideoInfo() {
-  const title = document.title.replace(" - YouTube", "").trim();
+  const title = document.title
+    .replace(" - YouTube", "")
+    .trim();
 
   return {
     title,
@@ -9,4 +9,11 @@ function getVideoInfo() {
   };
 }
 
-console.log("Informations vidéo :", getVideoInfo());
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.type === "GET_VIDEO_INFO") {
+    sendResponse({
+      success: true,
+      video: getVideoInfo()
+    });
+  }
+});
