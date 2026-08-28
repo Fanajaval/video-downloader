@@ -3,14 +3,29 @@
   "name": "Video Downloader MVP",
   "version": "1.0.0",
   "description": "Extension de téléchargement de contenus autorisés",
+
   "permissions": [
     "downloads",
     "activeTab"
   ],
+
   "host_permissions": [
-    "http://localhost:3000/*"
+    "http://localhost:3000/*",
+    "https://www.youtube.com/*"
   ],
+
   "action": {
     "default_popup": "popup/popup.html"
-  }
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/watch?v=*"
+      ],
+      "js": [
+        "content/content.js"
+      ]
+    }
+  ]
 }
