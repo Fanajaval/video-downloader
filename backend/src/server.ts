@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import { downloadFile } from "./downloader.js";
+import {createJob, getJob, updateJob} from "./jobs.js";
+
 
 const app = express();
 const PORT = 3000;
@@ -26,17 +28,10 @@ app.post("/api/download", async (req, res) => {
   try {
     const { url, filename } = req.body;
 
-    if (!url) {
+    if (!url || !filename) {
       return res.status(400).json({
         success: false,
-        message: "L'URL est obligatoire"
-      });
-    }
-
-    if (!filename) {
-      return res.status(400).json({
-        success: false,
-        message: "Le nom du fichier est obligatoire"
+        message: "L'URL et le nom du fichier sont obligatoires"
       });
     }
 
@@ -50,28 +45,74 @@ app.post("/api/download", async (req, res) => {
       });
     }
 
-    const filePath = await downloadFile(
-      url,
-      filename
-    );
+    const job = createJob(url, filename);
 
-    return res.json({
+    res.status(202).json({
       success: true,
-      message: "Téléchargement terminé",
-      file: filePath
+      jobId: job.id,
+      status: job.status
     });
+
+    //téléchargment en arrière-plan
+    updateJob(job.id, {
+      status: "downloading"
+    });
+
+    try {
+      const filePath = await downloadFile(
+        job.url,
+        job.filename,
+        (progress) => {
+          updateJob(job.id, {
+            progress
+          });
+        }
+      );
+
+      updateJob(job.id, {
+        status: "completed",
+        progress: 100,
+        filePath
+      });
+
+    } catch (error) {
+
+      console.error("Erreur téléchargement :", error);
+
+      updateJob(job.id, {
+        status: "error",
+        error: "Impossible de télécharger le fichier"
+      });
+    }
 
   } catch (error) {
 
-    console.error("Erreur téléchargement :", error);
+    console.error(error);
 
     return res.status(500).json({
       success: false,
-      message: "Impossible de télécharger le fichier"
+      message: "Erreur du serveur"
     });
   }
 });
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+app.get("/api/download/:jobId", (req, res) => {
+
+  const job = getJob(req.params.jobId);
+
+  if (!job) {
+    return res.status(404).json({
+      success: false,
+      message: "Téléchargement introuvable"
+    });
+  }
+
+  return res.json({
+    success: true,
+    job
+  });
 });
