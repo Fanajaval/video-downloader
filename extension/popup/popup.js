@@ -91,10 +91,7 @@ async function startDownload() {
 
   try {
 
-    /*
-     * Création du job
-     */
-
+    /*creation job*/
     const response = await fetch(
       "http://localhost:3000/api/download",
       {
@@ -130,10 +127,7 @@ async function startDownload() {
     status.textContent =
       "Téléchargement en cours...";
 
-    /*
-     * Surveillance du job
-     */
-
+    /*surveillance téléchargement*/
     await monitorDownload(jobId);
 
   } catch (error) {
@@ -172,10 +166,7 @@ async function monitorDownload(jobId) {
 
       const job = data.job;
 
-      /*
-       * Mise à jour de la progression
-       */
-
+      /*mise à jour téléchargement*/
       const progress = job.progress ?? 0;
 
       progressFill.style.width =
@@ -184,10 +175,8 @@ async function monitorDownload(jobId) {
       progressText.textContent =
         `${progress}%`;
 
-      /*
-       * Gestion des états
-       */
-
+      
+      /*gestion état téléchargement*/
       if (job.status === "pending") {
 
         progressStatus.textContent =
@@ -199,21 +188,47 @@ async function monitorDownload(jobId) {
           "Téléchargement";
 
       } else if (job.status === "completed") {
-
         clearInterval(interval);
 
         progressFill.style.width = "100%";
         progressText.textContent = "100%";
 
         progressStatus.textContent =
-          "Terminé";
+            "Préparation du fichier";
 
         status.textContent =
-          "Téléchargement terminé !";
+            "Enregistrement du fichier...";
+
+        try {
+
+            await chrome.downloads.download({
+            url: `http://localhost:3000/api/download/${jobId}/file`,
+            filename: job.filename,
+            saveAs: false
+            });
+
+            progressStatus.textContent =
+            "Terminé";
+
+            status.textContent =
+            "Téléchargement terminé !";
+
+        } catch (error) {
+
+            console.error(
+            "Erreur Chrome Downloads :",
+            error
+            );
+
+            progressStatus.textContent =
+            "Erreur";
+
+            status.textContent =
+            "Impossible d'enregistrer le fichier.";
+        }
 
         downloadBtn.disabled = false;
-
-      } else if (job.status === "error") {
+        } else if (job.status === "error") {
 
         clearInterval(interval);
 
