@@ -91,7 +91,6 @@ async function startDownload() {
 
   try {
 
-    /*creation job*/
     const response = await fetch(
       "http://localhost:3000/api/download",
       {
@@ -127,7 +126,6 @@ async function startDownload() {
     status.textContent =
       "Téléchargement en cours...";
 
-    /*surveillance téléchargement*/
     await monitorDownload(jobId);
 
   } catch (error) {
@@ -166,7 +164,6 @@ async function monitorDownload(jobId) {
 
       const job = data.job;
 
-      /*mise à jour téléchargement*/
       const progress = job.progress ?? 0;
 
       progressFill.style.width =
@@ -176,7 +173,6 @@ async function monitorDownload(jobId) {
         `${progress}%`;
 
       
-      /*gestion état téléchargement*/
       if (job.status === "pending") {
 
         progressStatus.textContent =

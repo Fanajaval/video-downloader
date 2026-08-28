@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { downloadFile } from "./downloader.js";
-import {createJob, getJob, updateJob} from "./jobs.js";
+import { createJob, getJob, updateJob } from "./jobs.js";
 
 
 const app = express();
@@ -53,7 +53,6 @@ app.post("/api/download", async (req, res) => {
       status: job.status
     });
 
-    //téléchargment en arrière-plan
     updateJob(job.id, {
       status: "downloading"
     });
@@ -81,7 +80,9 @@ app.post("/api/download", async (req, res) => {
 
       updateJob(job.id, {
         status: "error",
-        error: "Impossible de télécharger le fichier"
+        error: error instanceof Error
+          ? error.message
+          : "Impossible de télécharger le fichier"
       });
     }
 
@@ -115,4 +116,17 @@ app.get("/api/download/:jobId", (req, res) => {
     success: true,
     job
   });
+});
+
+app.get("/api/download/:jobId/file", (req, res) => {
+  const job = getJob(req.params.jobId);
+
+  if (!job || job.status !== "completed" || !job.filePath) {
+    return res.status(404).json({
+      success: false,
+      message: "Fichier non disponible"
+    });
+  }
+
+  return res.download(job.filePath, job.filename);
 });
