@@ -3,25 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Video Downloader</title>
+
   <link rel="stylesheet" href="popup.css">
 </head>
 
 <body>
+
   <div class="container">
 
-    <h1>Video Downloader</h1>
+    <header>
+      <h1>Video Downloader</h1>
+      <p>Téléchargeur de fichiers vidéo</p>
+    </header>
 
-    <div id="videoInfo">
-      <p id="status">Recherche d'une vidéo...</p>
-    </div>
+    <main>
 
-    <button id="downloadBtn" disabled>
-      Télécharger
-    </button>
+      <div class="video-card">
+
+        <div class="video-icon">
+            <img src="../icons/video.svg" alt="">
+        </div>
+
+        <div class="video-details">
+
+          <h2 id="videoTitle">
+            Recherche...
+          </h2>
+
+          <p id="videoUrl">
+            -
+          </p>
+
+        </div>
+
+      </div>
+
+      <button id="downloadBtn">
+        <img src="../icons/download.svg" alt="">
+        Télécharger
+      </button>
+
+      <p id="status">
+        Recherche d'une vidéo...
+      </p>
+
+    </main>
 
   </div>
 
   <script src="popup.js"></script>
+
 </body>
 </html>
